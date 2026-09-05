@@ -1,6 +1,7 @@
 # ./run_sim.py
 import time
 import numpy as np
+import imageio
 import mujoco
 import mujoco.viewer
 from src.assembly import assemble_robot
@@ -58,6 +59,15 @@ def main():
     m = mujoco.MjModel.from_xml_path(config.robot_scene)
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
+
+    print("ncam =", m.ncam)
+    for i in range(m.ncam):
+        print(" ", i, mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_CAMERA, i))
+    r = mujoco.Renderer(m, height=224, width=224)
+    for cam in ("tracking", "head_cam", "left_wrist_cam"):
+        r.update_scene(d, camera=cam)
+        imageio.imwrite(f"./outputs/cam_{cam}.png", r.render())
+
     simulation_thread(m, d, config) # launch simulation + viewer
     print("Safely Killed...")
 

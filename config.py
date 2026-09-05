@@ -28,7 +28,7 @@ class ArmConfig:
     def __post_init__(self):
         if self.end_effector_offset is None:
             self.end_effector_offset = np.array(
-                [0.1, -0.03, 0.0]
+                [0.1, -0.04, 0.0]
             )
 
 @dataclass
@@ -55,7 +55,7 @@ class HandConfig:
 
 @dataclass
 class WorkspaceConfig:
-    x: tuple[float, float] = (0.32, 0.55)
+    x: tuple[float, float] = (0.32, 0.45)
     y: tuple[float, float] = (0.02, 0.28)
     table_z: float = 0.72
     min_sep: float = 0.15
@@ -70,4 +70,4 @@ class SimulationConfig:
     robot_scene: str = "./robots/" + robot + "/scene_with_hands.xml" # Robot scene
     makers: bool = True
     hold_when_done: bool = False
-    draw_markers: bool = True
+    draw_markers: bool = False

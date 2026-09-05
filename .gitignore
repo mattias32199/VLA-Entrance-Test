@@ -4,3 +4,4 @@ __pycache__/
 robots/
 .DS_Store
 old/
+outputs/data

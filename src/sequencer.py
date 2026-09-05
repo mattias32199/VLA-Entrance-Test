@@ -4,7 +4,7 @@ from src.manual_actions import move_to_ik, hold, freeze, grip
 
 class Sequencer:
     def __init__(
-        self, robot, actions, home, down, err_thr=0.005, rot_thr=0.005, max_steps=1500, hold_when_done=True
+        self, robot, actions, home, down, err_thr=0.005, rot_thr=0.005, max_steps=3000, hold_when_done=True
     ):
         self.robot, self.actions, self.home, self.down = robot, actions, home, down
         self.err_thr, self.rot_thr, self.max_steps = err_thr, rot_thr, max_steps

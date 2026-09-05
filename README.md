@@ -1,6 +1,36 @@
 # VLA-Entrance-Test
 ## Overview
-Repo for VLA project entrance test.
+This project consists of one configurable task that is interfaced with mujoco.
+The task involves the picking up of a cylinder and dropping it inside a square bowl.
+The robot is restricted to moving its waist, left arm, and left arm.
+The following can to vary between episodes:
+- Initial positions of the cylinder and bowl.
+- Color of the cylindera and bowl.
+- Number of cylinder-bowl pairs (NOT IMPLEMENTED YET)
+
+### Data collection
+Each episode writes two files:
+```
+data/ep_n.npz # time series arrays
+data/ep_n.json # episode metadata
+```
+#### Time-series data
+- RGB images from left wrist camera and head camera
+- Arm chain joint angles in radians, see `config.py` for order
+- The end-effector / grasp position
+- The time (t)
+- Orientation of wrist and fingers
+- Commanded target positions `d.ctrl(...)` of hand
+#### Metadata
+- RNG seed
+- Success (whether the cylinder sits inside the bowl)
+- Natural language instruction
+- Object color(s)
+- Total simulation steps
+- Total frames
+- Initial and final object positions
+- Number of actions
+- Whether the robot timed out
 
 ## Structure
 ```
@@ -63,3 +93,9 @@ ROBOT="g1"
 ```
 #### Additional information
 - Make sure there are no folders with spaces in the path e.g. "VLA Project" to vla_project
+
+## Running the simulation
+```
+cd VLA-Entrance-Test
+mjpython run_sim.py
+```
