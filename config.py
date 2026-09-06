@@ -70,4 +70,4 @@ class SimulationConfig:
     robot_scene: str = "./robots/" + robot + "/scene_with_hands.xml" # Robot scene
     makers: bool = True
     hold_when_done: bool = False
-    draw_markers: bool = False
+    draw_markers: bool = True

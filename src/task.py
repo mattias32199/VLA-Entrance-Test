@@ -14,6 +14,17 @@ COLORS = {
     "orange": (0.95, 0.50, 0.10, 1.0),
 }
 
+TEMPLATES = [
+    "put the {color} cylinder in the {color} bowl",
+    "place the {color} cylinder into the {color} bowl",
+    "pick up the {color} cylinder and drop it in the {color} bowl",
+    "move the {color} cylinder to the {color} bowl",
+]
+
+
+def body_pos(m, d, name):
+    return d.xpos[name_id(m, mujoco.mjtObj.mjOBJ_BODY, name)].copy()
+
 
 def set_object_color(m, body_name, rgba):
     """Recolor every geom on a body."""
@@ -39,7 +50,7 @@ def task_move_cylinder(m, d, home, ws_config, rng=None):
     bowl_pos     = d.xpos[name_id(m, mujoco.mjtObj.mjOBJ_BODY, "bowl")].copy()
     approach = np.array([0.0, 0.0, 0.15])
 
-    return [
+    actions = [
         ("LeftArm",  "move", cylinder_pos + approach - home),
         ("LeftArm",  "move", cylinder_pos - home),
         ("LeftHand", "grip", 0.5),
@@ -47,24 +58,23 @@ def task_move_cylinder(m, d, home, ws_config, rng=None):
         ("LeftArm",  "move", bowl_pos + approach - home),
         ("LeftHand", "grip", 0.0),
     ]
+    meta = {
+        "color": str(color),
+        "instruction": str(rng.choice(TEMPLATES)).format(color=color),
+        "cylinder_pos_init": body_pos(m, d, "cylinder").tolist(),
+        "bowl_pos_init": body_pos(m, d, "bowl").tolist(),
+    }
+    return actions, meta
 
-# def task_move_cylinder(m, d, home):
-#     """
-#     Template for moving cylinder to bowl.
-#     Object positions are converted to relative coordinates by subtracting home.
-#     """
 
-#     # place objects in spots reachable by robot
-#     # robot doesn't move, keep z or height constant
-
-#     cylinder_id = name_id(m, mujoco.mjtObj.mjOBJ_BODY, "cylinder")
-#     cylinder_pos = d.xpos[cylinder_id].copy()
-#     bowl_id = name_id(m, mujoco.mjtObj.mjOBJ_BODY, "bowl")
-#     bowl_pos = d.xpos[bowl_id].copy()
-
-#     return [
-#         ("LeftArm", "move", cylinder_pos - home),
-#         ("LeftHand", "grip", 0.5), # close grip
-#         ("LeftArm", "move", bowl_pos - home + np.asarray([0.0, 0.0, 0.2])),
-#         ("LeftHand", "grip", 0.0) # open grip
-#     ]
+def in_bowl(m, d, obj="cylinder", bowl="bowl", xy_tol=0.05, max_h=0.12):
+    """True when the object is resting inside the bowl's footprint."""
+    ob = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, obj)
+    bb = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, bowl)
+    o, b = d.xpos[ob], d.xpos[bb]
+    over  = np.linalg.norm(o[:2] - b[:2]) < xy_tol
+    above = 0.0 < (o[2] - b[2]) < max_h
+    # not still moving / still in the hand
+    adr = m.jnt_dofadr[m.body_jntadr[ob]]
+    at_rest = np.linalg.norm(d.qvel[adr:adr + 3]) < 0.05
+    return bool(over and above and at_rest)

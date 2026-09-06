@@ -19,11 +19,12 @@ def simulation_thread(m, d, config):
     home = d.xpos[left_arm["ee_bid"]].copy()
     down = d.xquat[left_arm["ee_bid"]].copy()
 
-    actions = task_move_cylinder(m, d, home, config.ws_config)
+    actions, meta = task_move_cylinder(m, d, home, config.ws_config)
     sequencer = Sequencer(robot, actions, home, down, hold_when_done=config.hold_when_done)
 
     # get markers
-    markers = get_markers(actions, home)
+    if config.draw_markers:
+        markers = get_markers(actions, home)
 
     # launch viewer
     with mujoco.viewer.launch_passive(
